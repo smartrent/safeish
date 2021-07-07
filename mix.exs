@@ -37,8 +37,11 @@ defmodule Safeish.MixProject do
       files: ["lib", "mix.exs", "README.md", "LICENSE"],
       exclude_patterns: [".DS_Store"],
       licenses: ["MIT"],
-      links: %{"Github" => "https://github.com/robinhilliard/safeish"},
-      maintainers: ["Robin Hilliard"]
+      maintainers: ["Grace Yanagida", "Jean-Francois Cloutier"],
+      links: %{
+        "GitHub" => "https://github.com/smartrent/safeish"
+      },
+      organization: "smartrent"
     ]
   end
 
