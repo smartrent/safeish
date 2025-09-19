@@ -1,0 +1,17 @@
+version: 2
+
+registries:
+  smartrent-hex:
+    type: hex-organization
+    organization: smartrent
+    key: ${{secrets.HEX_PM_SECRET}}
+
+updates:
+  - directory: "/"
+    package-ecosystem: mix
+    registries:
+        - smartrent-hex
+    insecure-external-code-execution: allow
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
