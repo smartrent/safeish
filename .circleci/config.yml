@@ -1,0 +1,157 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: hexpm/elixir:1.18.1-erlang-27.0.1-alpine-3.21.2
+  environment:
+    MIX_ENV: test
+
+commands:
+  restore_tagged_cache:
+    parameters:
+      prefix:
+        description: "Cache key prefix"
+        type: string
+    steps:
+      - restore_cache:
+          keys:
+            - << parameters.prefix >>-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - << parameters.prefix >>-{{ .Branch }}-
+            - << parameters.prefix >>-
+
+  install_hex_rebar:
+    steps:
+      - run:
+          name: Install hex and rebar
+          command: |
+            mix local.hex --force
+            mix local.rebar --force
+
+  install_system_deps:
+    steps:
+      - run:
+          name: Install system dependencies
+          command: |
+            apk add build-base linux-headers libmnl-dev libnl3-dev curl npm
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - install_system_deps
+      - install_hex_rebar
+      - restore_tagged_cache:
+          prefix: v2-mix-cache
+      - run: mix hex.organization auth smartrent --key $SMARTRENT_HEX_KEY
+      - run: mix deps.get
+      - run: mix compile --warnings-as-errors
+      - save_cache:
+          key: v2-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths:
+            - _build
+            - deps
+
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - install_hex_rebar
+      - install_system_deps
+      - restore_cache:
+          keys:
+            - v2-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+      - run: mix deps.unlock --check-unused
+      - run: mix format --check-formatted
+      - run: mix credo --all
+      - run: mix docs
+      - run: mix hex.build
+
+  test:
+    <<: *defaults
+    parallelism: 4
+    steps:
+      - checkout
+      - install_hex_rebar
+      - install_system_deps
+      - restore_cache:
+          keys:
+            - v2-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+      - run:
+          name: Run tests
+          command:  mix test 'test/**/*_test.exs'
+      - store_test_results:
+          path: test-junit-report.xml
+
+  spellcheck:
+    <<: *defaults
+    docker:
+      - image: node:24-alpine
+    steps:
+      - checkout
+      - run:
+          name: Install cspell
+          command: npm install -g cspell
+      - run:
+          name: Run cspell
+          command: cspell --quiet .
+
+  dialyzer:
+    <<: *defaults
+    steps:
+      - checkout
+      - install_hex_rebar
+      - install_system_deps
+      - restore_tagged_cache:
+          prefix: v2-mix-cache
+      - restore_tagged_cache:
+          prefix: v2-dialyzer-cache
+      - run: mix dialyzer
+      - save_cache:
+          paths:
+            - _build/plts
+          key: v2-dialyzer-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+
+  automerge:
+    docker:
+        - image: alpine:3.20.1
+    <<: *defaults
+    steps:
+      - run:
+          name: Install GitHub CLI
+          command: apk add --no-cache build-base github-cli
+      - run:
+          name: Attempt PR automerge
+          command: |
+            author=$(gh pr view "${CIRCLE_PULL_REQUEST}" --json author --jq '.author.login' || true)
+
+            if [ "$author" = "app/dependabot" ]; then
+              gh pr merge "${CIRCLE_PULL_REQUEST}" --auto --rebase || echo "Failed trying to set automerge"
+            else
+              echo "Not a dependabot PR, skipping automerge"
+            fi
+
+workflows:
+  build_test:
+    max_auto_reruns: 3
+    jobs:
+      - spellcheck
+      - build:
+          context: smartrent-hex-key
+      - lint:
+          requires:
+            - build
+      - test:
+          requires:
+            - build
+      - dialyzer:
+          requires:
+            - build
+      - automerge:
+          requires:
+            - build
+          context: github-token
+          filters:
+            branches:
+              only: /^dependabot.*\//
