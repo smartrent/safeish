@@ -4,7 +4,7 @@ defmodule Safeish.MixProject do
   def project do
     [
       app: :safeish,
-      version: "0.5.1",
+      version: "0.5.2",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       description: description(),
