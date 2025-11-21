@@ -24,7 +24,7 @@ defmodule Decompile do
     IO.puts("@@@ CHUNKING BYTECODE")
     case :beam_lib.chunks(
            bytecode,
-           [~c"AtU8", ~c"LitT"],
+           [~c"AtU8", ~c"LitT", ~c"ImpT"],
            # [~c"AtU8", ~c"LitT", ~c"ImpT", ~c"ExpT", ~c"FunT", ~c"StrT", ~c"Code"],
            [:allow_missing_chunks]
          ) do
