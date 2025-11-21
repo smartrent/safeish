@@ -78,6 +78,10 @@ defmodule Decompile do
         IO.puts("@@@ CHUNKING ERROR #{inspect err}")
         err
     end
+  rescue
+    error ->
+      IO.puts("@@@ RESCUED CHUNKING ERROR #{inspect error}")
+      raise error
   end
 
   # Lookups/simplifications at tag level
