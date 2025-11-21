@@ -41,8 +41,6 @@ defmodule Decompile do
           {~c"Code", code}
         ] =  chunks
         IO.puts("@@@ PARSING")
-        parsed_atoms = parse_atoms(atoms)
-        IO.puts("@@@ PARSED ATOMS")
         parsed_literals = parse_literals(literals)
         IO.puts("@@@ PARSED LITERALS")
 
@@ -56,6 +54,8 @@ defmodule Decompile do
         IO.puts("@@@ PARSED STRING #{inspect strings}")
         [info | code] = parse_code(code)
         IO.puts("@@@ PARSED CODE")
+        parsed_atoms = parse_atoms(atoms)
+        IO.puts("@@@ PARSED ATOMS")
 
         {
           :ok,
