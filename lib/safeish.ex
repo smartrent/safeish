@@ -760,8 +760,8 @@ defmodule Safeish do
 
   # credo:disable-for-lines:24
   def module_risks(bytecode) when is_binary(bytecode) do
+    IO.puts("@@@ DE-COMPILING")
     case Decompile.decompile(bytecode) do
-      IO.puts("@@@ DE-COMPILING")
       {:ok, module, %Decompile{imports: imports, literals: literals, opcodes: opcodes}} ->
         function_literals =
           literals
