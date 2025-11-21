@@ -22,15 +22,16 @@ defmodule Decompile do
 
   def decompile(bytecode) do
     IO.puts("@@@ CHUNKING BYTECODE")
+
     case :beam_lib.chunks(
            bytecode,
            [~c"AtU8", ~c"LitT", ~c"ImpT", ~c"ExpT", ~c"FunT", ~c"StrT", ~c"Code"],
            # [~c"AtU8", ~c"LitT", ~c"ImpT", ~c"ExpT", ~c"FunT", ~c"StrT", ~c"Code"],
            [:allow_missing_chunks]
          ) do
-      {:ok,
-       {module, chunks}} ->
-        IO.puts("@@@ CHUNKS #{Enum.count(chunks)} #{inspect chunks}")
+      {:ok, {module, chunks}} ->
+        IO.puts("@@@ CHUNKS #{Enum.count(chunks)} #{inspect(chunks)}")
+
         [
           {~c"AtU8", atoms},
           {~c"LitT", literals},
@@ -39,23 +40,25 @@ defmodule Decompile do
           {~c"FunT", functions},
           {~c"StrT", strings},
           {~c"Code", code}
-        ] =  chunks
+        ] = chunks
+
         IO.puts("@@@ PARSING")
+
         parsed_literals = parse_literals(literals)
         IO.puts("@@@ PARSED LITERALS")
+        parsed_strings = parse_strings(strings)
+        IO.puts("@@@ PARSED STRING #{inspect(strings)}")
+        [info | code] = parse_code(code)
+        IO.puts("@@@ PARSED CODE")
 
+        parsed_atoms = parse_atoms(atoms)
+        IO.puts("@@@ PARSED ATOMS")
         parsed_imports = parse_imports(imports, parsed_atoms)
         IO.puts("@@@ PARSED IMPORTS")
         parsed_exports = parse_exports(exports, parsed_atoms)
         IO.puts("@@@ PARSED EXPORTS")
         parsed_functions = parse_functions(functions, parsed_atoms)
         IO.puts("@@@ PARSED FUNCTIONS")
-        parsed_strings = parse_strings(strings)
-        IO.puts("@@@ PARSED STRING #{inspect strings}")
-        [info | code] = parse_code(code)
-        IO.puts("@@@ PARSED CODE")
-        parsed_atoms = parse_atoms(atoms)
-        IO.puts("@@@ PARSED ATOMS")
 
         {
           :ok,
@@ -78,12 +81,12 @@ defmodule Decompile do
         }
 
       err ->
-        IO.puts("@@@ CHUNKING ERROR #{inspect err}")
+        IO.puts("@@@ CHUNKING ERROR #{inspect(err)}")
         err
     end
   rescue
     error ->
-      IO.puts("@@@ RESCUED CHUNKING ERROR #{inspect error}")
+      IO.puts("@@@ RESCUED CHUNKING ERROR #{inspect(error)}")
       raise error
   end
 
