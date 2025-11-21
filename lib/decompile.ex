@@ -42,7 +42,7 @@ defmodule Decompile do
           {~c"Code", code}
         ] = chunks
 
-        IO.puts("@@@ PARSING")
+        IO.puts("@@@ PARSING literals #{inspect literals}")
 
         parsed_literals = parse_literals(literals)
         IO.puts("@@@ PARSED LITERALS")
