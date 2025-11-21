@@ -75,6 +75,7 @@ defmodule Decompile do
         }
 
       err ->
+        IO.puts("@@@ CHUNKING ERROR #{inspect err}")
         err
     end
   end
