@@ -671,12 +671,16 @@ defmodule Safeish do
   ```
   """
   def load_bytecode(bytecode, whitelist \\ []) do
+    IO.puts("@@@ CHECKING BYTECODE")
+
     case check(bytecode, whitelist) do
       {:ok, module} ->
+        IO.puts("@@@ LOADING BINARY")
         {:module, _} = :code.load_binary(module, module, bytecode)
         {:ok, module}
 
       error ->
+        IO.puts("@@@ ERROR #{inspect(error)}")
         error
     end
   end
