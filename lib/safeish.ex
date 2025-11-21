@@ -761,6 +761,7 @@ defmodule Safeish do
   # credo:disable-for-lines:24
   def module_risks(bytecode) when is_binary(bytecode) do
     case Decompile.decompile(bytecode) do
+      IO.puts("@@@ DE-COMPILING")
       {:ok, module, %Decompile{imports: imports, literals: literals, opcodes: opcodes}} ->
         function_literals =
           literals
@@ -779,6 +780,7 @@ defmodule Safeish do
         {:ok, module, (Tuple.to_list(imports) ++ function_literals) |> Enum.into(opcodes)}
 
       error ->
+        IO.puts("@@@ DECOMPILE ERROR #{inspect error}")
         error
     end
   end
