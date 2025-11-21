@@ -705,8 +705,9 @@ defmodule Safeish do
   """
   def check(bytecode, whitelist \\ []) do
     {:ok, module, risks} = module_risks(bytecode)
+    IO.puts("@@@ MODULE RISKS #{inspect module_risks}")
     check_list = risks |> Enum.map(&risk_acceptable?(&1, whitelist))
-
+    IO.puts("@@@ CHECK_LIST #{inspect check_list}")
     if Enum.all?(check_list, &match?(:ok, &1)) do
       {:ok, module}
     else
