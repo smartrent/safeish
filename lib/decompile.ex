@@ -24,13 +24,13 @@ defmodule Decompile do
     IO.puts("@@@ CHUNKING BYTECODE")
     case :beam_lib.chunks(
            bytecode,
-           [~c"AtU8", ~c"LitT", ~c"ImpT", ~c"ImpT", ~c"ExpT", ~c"FunT", ~c"StrT", ~c"Code"],
+           [~c"AtU8", ~c"LitT", ~c"ImpT", ~c"ExpT", ~c"FunT", ~c"StrT", ~c"Code"],
            # [~c"AtU8", ~c"LitT", ~c"ImpT", ~c"ExpT", ~c"FunT", ~c"StrT", ~c"Code"],
            [:allow_missing_chunks]
          ) do
       {:ok,
        {module, chunks}} ->
-        IO.puts("@@@ CHUNKS #{inspect chunks}")
+        IO.puts("@@@ CHUNKS #{Enum.count(chunks)} #{inspect chunks}")
         [
           {~c"AtU8", atoms},
           {~c"LitT", literals},
@@ -40,6 +40,7 @@ defmodule Decompile do
           {~c"StrT", strings},
           {~c"Code", code}
         ] =  chunks
+        IO.puts("@@@ PARSING")
         parsed_atoms = parse_atoms(atoms)
         IO.puts("@@@ PARSED ATOMS")
         parsed_literals = parse_literals(literals)
