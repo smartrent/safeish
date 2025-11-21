@@ -21,6 +21,7 @@ defmodule Decompile do
             opcodes: MapSet.new()
 
   def decompile(bytecode) do
+    IO.puts("@@@ CHUNKING BYTECODE")
     case :beam_lib.chunks(
            bytecode,
            [~c"AtU8", ~c"LitT", ~c"ImpT", ~c"ExpT", ~c"FunT", ~c"StrT", ~c"Code"],
@@ -38,12 +39,20 @@ defmodule Decompile do
           {~c"Code", code}
         ]}} ->
         parsed_atoms = parse_atoms(atoms)
+        IO.puts("@@@ PARSED ATOMS")
         parsed_literals = parse_literals(literals)
+        IO.puts("@@@ PARSED LITERALS")
+
         parsed_imports = parse_imports(imports, parsed_atoms)
+        IO.puts("@@@ PARSED IMPORTS")
         parsed_exports = parse_exports(exports, parsed_atoms)
+        IO.puts("@@@ PARSED EXPORTS")
         parsed_functions = parse_functions(functions, parsed_atoms)
+        IO.puts("@@@ PARSED FUNCTIONS")
         parsed_strings = parse_strings(strings)
+        IO.puts("@@@ PARSED STRING #{inspect strings}")
         [info | code] = parse_code(code)
+        IO.puts("@@@ PARSED CODE")
 
         {
           :ok,
