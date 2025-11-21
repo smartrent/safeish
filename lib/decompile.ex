@@ -173,6 +173,10 @@ defmodule Decompile do
   def parse_literals(<<_compressed_table_size::integer-size(32), compressed::binary>>) do
     <<_number_of_literals::integer-size(32), table::binary>> = :zlib.uncompress(compressed)
     parse_literals(table, [])
+  rescue
+    error ->
+    IO.puts("@@@ ZLIB UNCOMPLRESS ERROR #{inspect error}")
+    raise error
   end
 
   def parse_literals(<<>>, literals), do: literals |> Enum.reverse() |> List.to_tuple()
